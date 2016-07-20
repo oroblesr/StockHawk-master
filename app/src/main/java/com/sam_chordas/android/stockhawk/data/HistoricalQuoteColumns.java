@@ -23,7 +23,8 @@ public interface HistoricalQuoteColumns {
     @DataType(DataType.Type.TEXT) @NotNull String CLOSE = "close";
     @DataType(DataType.Type.INTEGER) @NotNull String VOLUME = "volume";
     @DataType(DataType.Type.INTEGER) @NotNull String ISCURRENT = "is_current";
-
-
+    @DataType(DataType.Type.INTEGER) @NotNull String DAY = "day";
+    @DataType(DataType.Type.INTEGER) @NotNull String MONTH = "month";
+    @DataType(DataType.Type.INTEGER) @NotNull String YEAR = "year";
 
 }

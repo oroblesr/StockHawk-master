@@ -34,6 +34,7 @@ public class StockIntentService extends IntentService {
 
 
 
+//TODO
 
         Log.d(StockIntentService.class.getSimpleName(), "Stock Intent Service");
         StockHistoricalService stockHistoricalService = new StockHistoricalService(this);

@@ -55,7 +55,7 @@ public class QuoteProvider {
                 path = Path.HISTORICAL,
                 type = "vnd.android.cursor.dir/historical"
         )
-        public static final Uri CONTENT_URI = buildUri(Path.HISTORICAL);
+        public static final Uri HISTORICAL_URI = buildUri(Path.HISTORICAL);
 
         @InexactContentUri(
                 name = "QUOTE_ID",

@@ -7,8 +7,17 @@ import com.sam_chordas.android.stockhawk.data.HistoricalQuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -180,12 +189,27 @@ public class Utils {
         final String YQL_LOW = "Low";
         final String YQL_CLOSE = "Close";
         final String YQL_VOLUME = "Volume";
+        final String YQL_DATE_FORMAT = "yyyy-MM-dd";
 
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
-                QuoteProvider.Historical.CONTENT_URI);
+                QuoteProvider.Historical.HISTORICAL_URI);
         try {
             builder.withValue(HistoricalQuoteColumns.SYMBOL, jsonObject.getString(YQL_SYMBOL));
-            builder.withValue(HistoricalQuoteColumns.DATE, jsonObject.getString(YQL_DATE));
+            String date = jsonObject.getString(YQL_DATE);
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(YQL_DATE_FORMAT);
+            DateTime jodaTime = dateTimeFormatter.parseDateTime(date);
+
+            int year = jodaTime.getYear();
+            int month = jodaTime.getMonthOfYear();
+            int day = jodaTime.getDayOfMonth();
+
+            builder.withValue(HistoricalQuoteColumns.DATE,date );
+
+            builder.withValue(HistoricalQuoteColumns.DAY,day );
+            builder.withValue(HistoricalQuoteColumns.MONTH,month );
+            builder.withValue(HistoricalQuoteColumns.YEAR,year );
+
             builder.withValue(HistoricalQuoteColumns.SYMBOL, jsonObject.getString(YQL_SYMBOL));
 
             builder.withValue(HistoricalQuoteColumns.OPEN,
@@ -199,7 +223,6 @@ public class Utils {
                     truncateBidPrice(jsonObject.getString(YQL_CLOSE)));
 
             builder.withValue(HistoricalQuoteColumns.VOLUME, jsonObject.getInt(YQL_VOLUME));
-
             builder.withValue(HistoricalQuoteColumns.ISCURRENT, 1);
 
         } catch (JSONException e) {

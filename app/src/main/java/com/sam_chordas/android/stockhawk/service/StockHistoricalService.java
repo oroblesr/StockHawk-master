@@ -68,11 +68,18 @@ public class StockHistoricalService extends GcmTaskService {
         if (params.getTag().equals("init") || params.getTag().equals("periodic")) {
             isUpdate = true;
             initQueryCursor = mContext.getContentResolver()
-                    .query(QuoteProvider.Historical.CONTENT_URI,
-                            new String[]{"Distinct " + HistoricalQuoteColumns.SYMBOL},
+                    .query(QuoteProvider.Historical.HISTORICAL_URI,
+                            null,
                             null,
                             null,
                             null);
+            /*
+            initQueryCursor = mContext.getContentResolver()
+                    .query(QuoteProvider.Historical.HISTORICAL_URI,
+                            new String[]{"Distinct " + HistoricalQuoteColumns.DATE},
+                            null,
+                            null,
+                            null);*/
             if (initQueryCursor != null) {
                 if (initQueryCursor.getCount() == 0) {
                     // Init task. Populates DB with quotes for the symbols seen below
@@ -80,8 +87,11 @@ public class StockHistoricalService extends GcmTaskService {
                         urlStringBuilder.append(
                                 URLEncoder.encode("\"YHOO\")", "UTF-8"));
                         urlStringBuilder.append(
-                                URLEncoder.encode("and startDate = \"2012-09-11\"" +
-                                        "and endDate   = \"2013-02-11\"", "UTF-8"));
+                                //Please consult https://developer.yahoo.com/yql/guide/yql-execute-intro-ratelimits.html for rate limits
+                                // It is preferred to request year by year
+                                //TODO FIX
+                                URLEncoder.encode("and startDate = \"2015-02-11\"" +
+                                        "and endDate   = \"2016-02-11\"", "UTF-8"));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -137,7 +147,7 @@ public class StockHistoricalService extends GcmTaskService {
                     // update ISCURRENT to 0 (false) so new data is current
                     if (isUpdate) {
                         contentValues.put(HistoricalQuoteColumns.ISCURRENT, 0);
-                        mContext.getContentResolver().update(QuoteProvider.Historical.CONTENT_URI,
+                        mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
                                 contentValues,
                                 null,
                                 null);

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -20,6 +21,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.data.DBOperations;
 
 import java.util.ArrayList;
 
@@ -58,24 +60,39 @@ public class StocksDetailFragment extends Fragment {
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         mContext = getContext();
 
-        DatePicker startDatePicker = (DatePicker) rootView.findViewById(R.id.start_date_picker);
-        DatePicker endDatePicker = (DatePicker) rootView.findViewById(R.id.end_date_picker);
+        final DatePicker startDatePicker = (DatePicker) rootView.findViewById(R.id.start_date_picker);
+        final DatePicker endDatePicker = (DatePicker) rootView.findViewById(R.id.end_date_picker);
 
-
+        Button dateButton = (Button) rootView.findViewById(R.id.date_button);
         //TODO SET predefined date
         // TODO validate end > start
-        int startDay, startMonth, startYear;
-        int endDay, endMonth, endYear;
-        startDay = startDatePicker.getDayOfMonth();
-        startMonth = startDatePicker.getMonth();
-        startYear = startDatePicker.getYear();
 
-        endDay = endDatePicker.getDayOfMonth();
-        endMonth = endDatePicker.getMonth();
-        endYear = endDatePicker.getYear();
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int startDay, startMonth, startYear;
+                int endDay, endMonth, endYear;
 
-        Log.e("test ","start day -----" + String.valueOf(startDay));
-        Log.e("test ","end day -----" + String.valueOf(endDay));
+                startDay = startDatePicker.getDayOfMonth();
+                // Months in DatePicker are indexed starting at 0
+                startMonth = startDatePicker.getMonth() + 1;
+                startYear = startDatePicker.getYear();
+
+                endDay = endDatePicker.getDayOfMonth();
+                // Months in DatePicker are indexed starting at 0
+                endMonth = endDatePicker.getMonth() + 1;
+                endYear = endDatePicker.getYear();
+
+                int[] startDate = {startDay,startMonth,startYear};
+                int[] endDate = {endDay,endMonth,endYear};
+
+                DBOperations historicalDB = new DBOperations();
+                historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate);
+                historicalDB.execute();
+            }
+        });
+
+
 
         lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
         lineChart.setDescription("This a test");
@@ -127,7 +144,6 @@ public class StocksDetailFragment extends Fragment {
     }
 
     private void setData() {
-
         int count = 5;
 
         ArrayList<Entry> yVals1 = new ArrayList<Entry>();
