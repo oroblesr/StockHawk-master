@@ -36,6 +36,23 @@
 
         </activity>
 
+
+        <!--Widget -->
+        <receiver
+            android:name=".widget.StockWidgetProvider"
+            android:label="@string/title_stock_widget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/stock_widget_provider" />
+        </receiver>
+        <service
+            android:name=".widget.StockWidgetRemoteViewsService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+
         <service
             android:name="com.sam_chordas.android.stockhawk.service.StockTaskService"
             android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE"

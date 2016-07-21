@@ -26,6 +26,7 @@
     <string name="october">Oct</string>
     <string name="november">Nov</string>
     <string name="december">Dec</string>
+    <string name="title_stock_widget">StockHawk</string>
 
 
 </resources>
