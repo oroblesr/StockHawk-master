@@ -3,7 +3,7 @@ apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24"
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         applicationId "com.example.sam_chordas.stockhawk"
@@ -31,8 +31,8 @@ dependencies {
     apt 'net.simonvt.schematic:schematic-compiler:0.6.7'
     compile 'net.simonvt.schematic:schematic:0.6.7'
     compile 'com.melnykov:floatingactionbutton:1.2.0'
-    compile 'com.android.support:design:24.0.0'
-    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:design:24.1.1'
+    compile 'com.android.support:appcompat-v7:24.1.1'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.0-beta1'
     compile('com.github.afollestad.material-dialogs:core:0.8.5.7@aar') {
         transitive = true
