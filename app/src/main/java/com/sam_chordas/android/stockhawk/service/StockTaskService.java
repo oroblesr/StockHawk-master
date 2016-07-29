@@ -130,8 +130,10 @@ public class StockTaskService extends GcmTaskService {
                     // update ISCURRENT to 0 (false) so new data is current
                     if (isUpdate) {
                         contentValues.put(QuoteColumns.ISCURRENT, 0);
-                        mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
-                                null, null);
+                        mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI,
+                                contentValues,
+                                null,
+                                null);
                     }
                     mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                             Utils.quoteJsonToContentVals(getResponse));

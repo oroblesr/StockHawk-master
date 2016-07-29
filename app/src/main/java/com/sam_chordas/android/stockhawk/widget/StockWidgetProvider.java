@@ -1,5 +1,6 @@
 package com.sam_chordas.android.stockhawk.widget;
 
+import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -7,8 +8,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.widget.ListViewCompat;
+import android.util.Log;
+import android.widget.ListView;
 import android.widget.RemoteViews;
 
 import com.sam_chordas.android.stockhawk.R;
@@ -32,7 +37,8 @@ public class StockWidgetProvider extends AppWidgetProvider {
            // remoteViews.setOnClickPendingIntent(R.id.widget_list, pendingIntent);
 
             remoteViews.setRemoteAdapter(R.id.widget_list,
-                    new Intent(context, StockWidgetRemoteViewsService.class));
+                    new Intent(context, StockWidgetRemoteViewsService.class)
+                            .putExtra("appWidgetId",appWidgetId));
 
             Intent clickIntentTemplate = new Intent(context, MyStocksActivity.class);
             PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
@@ -42,6 +48,9 @@ public class StockWidgetProvider extends AppWidgetProvider {
             // TODO setEmptyView
            // remoteViews.setEmptyView(R.id.widget_list, R.id.widget_empty);
             // Tell the AppWidgetManager to perform an update on the current app widget
+
+
+
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
 
 
