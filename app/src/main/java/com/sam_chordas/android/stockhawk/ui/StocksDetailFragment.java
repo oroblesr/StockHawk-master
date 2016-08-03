@@ -32,6 +32,8 @@ import java.util.ArrayList;
 public class StocksDetailFragment extends Fragment {
     private Context mContext;
     private LineChart lineChart;
+    private int[] startDate;
+    private int[] endDate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,38 +62,20 @@ public class StocksDetailFragment extends Fragment {
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         mContext = getContext();
 
-        final DatePicker startDatePicker = (DatePicker) rootView.findViewById(R.id.start_date_picker);
-        final DatePicker endDatePicker = (DatePicker) rootView.findViewById(R.id.end_date_picker);
+        boolean isTablet = getResources().getBoolean(R.bool.isTablet);
+        if (isTablet){
+            setTabletLayout(rootView);
+        }
+        else {
+            setPhoneLayout(rootView);
+        }
 
-        Button dateButton = (Button) rootView.findViewById(R.id.date_button);
-        //TODO SET predefined date
-        // TODO validate end > start
+        if (startDate != null && endDate != null) {
+            DBOperations historicalDB = new DBOperations();
+            historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate);
+            historicalDB.execute();
 
-        dateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int startDay, startMonth, startYear;
-                int endDay, endMonth, endYear;
-
-                startDay = startDatePicker.getDayOfMonth();
-                // Months in DatePicker are indexed starting at 0
-                startMonth = startDatePicker.getMonth() + 1;
-                startYear = startDatePicker.getYear();
-
-                endDay = endDatePicker.getDayOfMonth();
-                // Months in DatePicker are indexed starting at 0
-                endMonth = endDatePicker.getMonth() + 1;
-                endYear = endDatePicker.getYear();
-
-                int[] startDate = {startDay,startMonth,startYear};
-                int[] endDate = {endDay,endMonth,endYear};
-
-                DBOperations historicalDB = new DBOperations();
-                historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate);
-                historicalDB.execute();
-            }
-        });
-
+        }
 
 
         lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
@@ -189,4 +173,41 @@ public class StocksDetailFragment extends Fragment {
             lineChart.setData(data);
         }
     }
+
+    void setTabletLayout(View rootView) {
+
+        final DatePicker startDatePicker = (DatePicker) rootView.findViewById(R.id.start_date_picker);
+        final DatePicker endDatePicker = (DatePicker) rootView.findViewById(R.id.end_date_picker);
+
+        Button dateButton = (Button) rootView.findViewById(R.id.date_button);
+        //TODO SET predefined date
+        // TODO validate end > start
+
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int startDay, startMonth, startYear;
+                int endDay, endMonth, endYear;
+
+                startDay = startDatePicker.getDayOfMonth();
+                // Months in DatePicker are indexed starting at 0
+                startMonth = startDatePicker.getMonth() + 1;
+                startYear = startDatePicker.getYear();
+
+                endDay = endDatePicker.getDayOfMonth();
+                // Months in DatePicker are indexed starting at 0
+                endMonth = endDatePicker.getMonth() + 1;
+                endYear = endDatePicker.getYear();
+
+                startDate = new int[]{startDay, startMonth, startYear};
+                endDate = new int[] {endDay,endMonth,endYear};
+
+            }
+        });
+    }
+
+    void setPhoneLayout(View rootView) {
+
+    }
+
 }

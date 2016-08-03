@@ -26,7 +26,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/editText"
-                android:layout_columnSpan="3"
                 android:text="THIS IS A TEST" />
 
 
@@ -36,6 +35,7 @@
                 android:layout_columnSpan="3"
                 android:layout_height="256dp"
                 android:layout_gravity="fill_horizontal" />
+
 
             <Button
                 android:layout_width="wrap_content"
@@ -66,27 +66,38 @@
                 android:id="@+id/customDateText"
                 android:layout_row="4"/>
 
-            <Button
+
+            <DatePicker
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/start_date"
-                android:id="@+id/start_date_button"
+                android:id="@+id/start_date_picker"
+                android:datePickerMode="spinner"
+                android:calendarViewShown="false"
                 android:layout_column="0"
-                android:layout_row="5"/>
+                android:layout_row="5"
+                android:layout_gravity="center" />
 
             <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
                 android:layout_column="1"
-                android:layout_row="5"/>
+                android:layout_row="5" />
+
+            <DatePicker
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/end_date_picker"
+                android:datePickerMode="spinner"
+                android:calendarViewShown="false"
+                android:layout_column="2"
+                android:layout_row="5"
+                android:layout_gravity="center" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/end_date"
-                android:id="@+id/end_date_button"
-                android:layout_column="2"
-                android:layout_row="5"/>
+                android:text="@string/show_graph_for_custom_date"
+                android:id="@+id/date_button" />
 
 
         </GridLayout>

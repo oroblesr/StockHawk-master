@@ -28,5 +28,12 @@
     <string name="december">Dec</string>
     <string name="title_stock_widget">StockHawk</string>
 
+    <string name="last_month">Last Month</string>
+    <string name="last_year">Last Year</string>
+    <string name="custom_date">Custom Date</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="show_graph_for_custom_date">Show graph for custom date</string>
+
 
 </resources>
