@@ -1,10 +1,8 @@
 package com.sam_chordas.android.stockhawk.ui;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,16 +10,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.sam_chordas.android.stockhawk.R;
-import com.sam_chordas.android.stockhawk.data.DBOperations;
 
 import java.util.ArrayList;
 
@@ -70,14 +59,6 @@ public class StocksDetailFragment extends Fragment {
             setPhoneLayout(rootView);
         }
 
-        if (startDate != null && endDate != null) {
-            DBOperations historicalDB = new DBOperations();
-            historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate);
-            historicalDB.execute();
-
-        }
-
-
         lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
         lineChart.setDescription("This a test");
         lineChart.setNoDataTextDescription("You need to provide data for the chart.");
@@ -85,93 +66,9 @@ public class StocksDetailFragment extends Fragment {
         // enable touch gestures
         lineChart.setTouchEnabled(true);
 
-        // add data
-        setData();
-
-        lineChart.animateX(2500);
-
-        // get the legend (only possible after setting data)
-        Legend l = lineChart.getLegend();
-
-        // modify the legend ...
-        l.setForm(Legend.LegendForm.LINE);
-        l.setTextSize(11f);
-        l.setTextColor(Color.WHITE);
-        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
-
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextSize(11f);
-        xAxis.setTextColor(Color.WHITE);
-        xAxis.setDrawGridLines(false);
-        xAxis.setDrawAxisLine(false);
-
-
-        //TODO
-        float yAxisMaxValue = 100f;
-
-        YAxis leftAxis = lineChart.getAxisLeft();
-        leftAxis.setTextColor(ColorTemplate.getHoloBlue());
-        leftAxis.setAxisMaxValue(yAxisMaxValue);
-        leftAxis.setAxisMinValue(0f);
-        leftAxis.setDrawGridLines(true);
-        leftAxis.setGranularityEnabled(true);
-
-        YAxis rightAxis = lineChart.getAxisRight();
-        rightAxis.setTextColor(ColorTemplate.getHoloBlue());
-        rightAxis.setAxisMaxValue(yAxisMaxValue);
-        rightAxis.setAxisMinValue(0f);
-        rightAxis.setDrawGridLines(true);
-        rightAxis.setGranularityEnabled(true);
-
-
-    }
-
-    private void setData() {
-        int count = 5;
-
-        ArrayList<Entry> yVals1 = new ArrayList<Entry>();
-
-        for (int i = 0; i < count; i++) {
-            float val = (float) 50;
-            yVals1.add(new Entry(i, val));
-        }
 
 
 
-        LineDataSet set1;
-
-        if (lineChart.getData() != null &&
-                lineChart.getData().getDataSetCount() > 0) {
-            set1 = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
-            set1.setValues(yVals1);
-
-            lineChart.getData().notifyDataChanged();
-            lineChart.notifyDataSetChanged();
-        } else {
-            // create a dataset and give it a type
-            set1 = new LineDataSet(yVals1, "DataSet 1");
-            set1.setAxisDependency(YAxis.AxisDependency.LEFT);
-            set1.setColor(ColorTemplate.getHoloBlue());
-            set1.setCircleColor(Color.WHITE);
-            set1.setLineWidth(2f);
-            set1.setCircleRadius(3f);
-            set1.setFillAlpha(65);
-            set1.setFillColor(ColorTemplate.getHoloBlue());
-            set1.setHighLightColor(Color.rgb(244, 117, 117));
-            set1.setDrawCircleHole(false);
-
-            ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-            dataSets.add(set1); // add the datasets
-
-            // create a data object with the datasets
-            LineData data = new LineData(dataSets);
-            data.setValueTextColor(Color.WHITE);
-            data.setValueTextSize(9f);
-
-            // set data
-            lineChart.setData(data);
-        }
     }
 
     void setTabletLayout(View rootView) {
@@ -201,6 +98,13 @@ public class StocksDetailFragment extends Fragment {
 
                 startDate = new int[]{startDay, startMonth, startYear};
                 endDate = new int[] {endDay,endMonth,endYear};
+
+                if (startDate != null && endDate != null) {
+                    HistoricalAsyncTask historicalDB = new HistoricalAsyncTask();
+                    historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate, lineChart);
+                    historicalDB.execute();
+
+                }
 
             }
         });
