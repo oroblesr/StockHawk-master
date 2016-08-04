@@ -2,6 +2,7 @@ package com.sam_chordas.android.stockhawk.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -112,6 +113,27 @@ public class StocksDetailFragment extends Fragment {
 
     void setPhoneLayout(View rootView) {
 
+        Button startDateButton = (Button) rootView.findViewById(R.id.start_date_button);
+        Button endDateButton = (Button) rootView.findViewById(R.id.end_date_button);
+
+        startDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                DialogFragment dialogFragment = new DatePickerFragment();
+                dialogFragment.show(getFragmentManager(), "datePicker");
+            }
+        });
+
+
+        endDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                DialogFragment dialogFragment = new DatePickerFragment();
+                dialogFragment.show(getFragmentManager(), "datePicker");
+            }
+        });
     }
 
 }
