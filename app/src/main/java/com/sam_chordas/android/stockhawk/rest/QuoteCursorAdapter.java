@@ -1,21 +1,27 @@
 package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperAdapter;
 import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
+import com.sam_chordas.android.stockhawk.ui.StocksDetailActivity;
+import com.sam_chordas.android.stockhawk.ui.StocksDetailFragment;
 
 /**
  * Created by sam_chordas on 10/6/15.
@@ -24,7 +30,7 @@ import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
  * for the code structure
  */
 public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAdapter.ViewHolder>
-        implements ItemTouchHelperAdapter {
+        implements ItemTouchHelperAdapter{
 
     private static Context mContext;
     private static Typeface robotoLight;
@@ -77,6 +83,39 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int position = viewHolder.getAdapterPosition();
+                cursor.moveToPosition(position);
+
+                String stockSymbol = cursor.getString(cursor.getColumnIndex("symbol"));
+                String stockName = cursor.getString(cursor.getColumnIndex("name"));
+
+                boolean isTablet = mContext.getResources().getBoolean(R.bool.isTablet);
+                if (isTablet) {
+                    Intent intent = new Intent();
+                    intent.putExtra(Utils.NAME_INTENT, stockName);
+                    intent.putExtra(Utils.SYMBOL_INTENT, stockSymbol);
+                    ((AppCompatActivity) mContext).setIntent(intent);
+
+                    ((AppCompatActivity) mContext).getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.detail_container,  new StocksDetailFragment())
+                            .commit();
+                }
+                else {
+                    Intent intent = new Intent(mContext, StocksDetailActivity.class);
+
+                    intent.putExtra(Utils.NAME_INTENT, stockName);
+                    intent.putExtra(Utils.SYMBOL_INTENT, stockSymbol);
+
+                    mContext.startActivity(intent);
+                }
+
+            }
+        });
     }
 
     @Override
@@ -94,13 +133,18 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
         }
     }
 
+
+
+
     @Override
     public int getItemCount() {
         return super.getItemCount();
     }
 
+
+
     public static class ViewHolder extends RecyclerView.ViewHolder
-            implements ItemTouchHelperViewHolder, View.OnClickListener {
+            implements ItemTouchHelperViewHolder {
         public final TextView symbol;
         public final TextView bidPrice;
         public final TextView change;
@@ -123,9 +167,6 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
             itemView.setBackgroundColor(0);
         }
 
-        @Override
-        public void onClick(View v) {
 
-        }
     }
 }

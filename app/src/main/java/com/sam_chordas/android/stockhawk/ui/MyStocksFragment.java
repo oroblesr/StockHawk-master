@@ -12,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,8 +19,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -61,40 +58,6 @@ public class MyStocksFragment extends Fragment implements LoaderManager.LoaderCa
     private Context mContext;
     private Cursor mCursor;
     boolean isConnected;
-
-    private RecyclerViewItemClickListener.OnItemClickListener clickListener =
-            new RecyclerViewItemClickListener.OnItemClickListener() {
-                @Override
-                public void onItemClick(View v, int position) {
-
-                    Toast toast = Toast.makeText(getContext(),"---- Test " + String.valueOf(position), Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    Intent intent = new Intent(mContext, StocksDetailActivity.class);
-
-
-                    boolean isTablet = mContext.getResources().getBoolean(R.bool.isTablet);
-                    if (isTablet) {
-                        openTabletFragment(position);
-                    }
-                    else {
-                        //TODO:
-                        // Pass relevant info
-                        mContext.startActivity(intent);
-                    }
-
-                }
-            };
-
-    public void openTabletFragment(int position){
-        Intent intent = new Intent();
-        ((AppCompatActivity) mContext).setIntent(intent);
-
-        getChildFragmentManager()
-                .beginTransaction()
-                .replace(R.id.detail_container,  new StocksDetailFragment())
-                .commit();
-    }
 
 
     @Override
@@ -136,20 +99,7 @@ public class MyStocksFragment extends Fragment implements LoaderManager.LoaderCa
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null,this);
 
         mCursorAdapter = new QuoteCursorAdapter(getContext(), null);
-        /*
-        recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(this,
-                new RecyclerViewItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View v, int position) {
-                        //TODO:
-                        // do something on item click
 
-                        Toast toast = Toast.makeText(getApplicationContext(),"Test " + String.valueOf(position), Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                }));*/
-
-        recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(getContext(),clickListener));
         recyclerView.setAdapter(mCursorAdapter);
 
 
@@ -247,7 +197,8 @@ public class MyStocksFragment extends Fragment implements LoaderManager.LoaderCa
         // This narrows the return to only the stocks that are most current.
         return new CursorLoader(getContext(), QuoteProvider.Quotes.CONTENT_URI,
                 new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP,
+                        QuoteColumns.NAME},
                 QuoteColumns.ISCURRENT + " = ?",
                 new String[]{"1"},
                 null);

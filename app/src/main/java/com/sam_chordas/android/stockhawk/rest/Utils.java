@@ -33,6 +33,9 @@ public class Utils {
     private final static String YQL_RESULTS = "results";
     private final static String YQL_QUOTE = "quote";
 
+    public static String SYMBOL_INTENT = "symbol";
+    public static String NAME_INTENT = "name";
+
     private static String LOG_TAG = Utils.class.getSimpleName();
 
     public static boolean showPercent = true;
@@ -127,7 +130,9 @@ public class Utils {
 
 
     public static String truncateBidPrice(String bidPrice) {
-        bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
+        if (bidPrice != null){
+            bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
+        }
         return bidPrice;
     }
 

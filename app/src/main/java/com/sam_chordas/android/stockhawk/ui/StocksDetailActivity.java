@@ -11,8 +11,6 @@ import com.sam_chordas.android.stockhawk.R;
 
 public class StocksDetailActivity extends AppCompatActivity {
 
-    private String intentKey = "ParcelableArray";
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

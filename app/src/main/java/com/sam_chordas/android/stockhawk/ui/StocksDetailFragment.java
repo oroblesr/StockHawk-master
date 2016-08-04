@@ -1,6 +1,7 @@
 package com.sam_chordas.android.stockhawk.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,7 @@ import android.widget.DatePicker;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.rest.Utils;
 
 import java.util.ArrayList;
 
@@ -24,12 +26,8 @@ public class StocksDetailFragment extends Fragment {
     private LineChart lineChart;
     private int[] startDate;
     private int[] endDate;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_detail, container, false);
-    }
+    String stockSymbol;
+    String stockName;
 
     private void addMonths(){
         ArrayList<String> labels = new ArrayList<String>();
@@ -47,6 +45,23 @@ public class StocksDetailFragment extends Fragment {
         labels.add(getString(R.string.december));
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent intent = getActivity().getIntent();
+        stockName = intent.getStringExtra(Utils.NAME_INTENT);
+        stockSymbol = intent.getStringExtra(Utils.SYMBOL_INTENT);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_detail, container, false);
+    }
+
+
+
 
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
@@ -61,6 +76,7 @@ public class StocksDetailFragment extends Fragment {
         }
 
         lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
+        // TODO correct description
         lineChart.setDescription("This a test");
         lineChart.setNoDataTextDescription("You need to provide data for the chart.");
 
