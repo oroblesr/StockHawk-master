@@ -32,19 +32,5 @@ public class StockIntentService extends IntentService {
         // scheduling a task.
         stockTaskService.onRunTask(new TaskParams(intent.getStringExtra("tag"), args));
 
-
-
-//TODO
-
-        Log.d(StockIntentService.class.getSimpleName(), "Stock Intent Service");
-        StockHistoricalService stockHistoricalService = new StockHistoricalService(this);
-        Bundle argsHistorical = new Bundle();
-        if (intent.getStringExtra("tag").equals("add")) {
-            argsHistorical.putString("symbol", intent.getStringExtra("symbol"));
-        }
-        // We can call OnRunTask from the intent service to force it to run immediately instead of
-        // scheduling a task.
-        stockHistoricalService.onRunTask(new TaskParams(intent.getStringExtra("tag"), argsHistorical));
-
     }
 }

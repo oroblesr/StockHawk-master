@@ -11,6 +11,7 @@
     <string name="input_prefill"></string>
     <string name="network_toast">Uh-oh! This app requires an internet connection</string>
     <string name="stock_detail_name">Stock detail</string>
+    <string name="no_data_text_description">Please select an option</string>
 
 
 
@@ -34,6 +35,7 @@
     <string name="start_date">Start Date</string>
     <string name="end_date">End Date</string>
     <string name="show_graph_for_custom_date">Show graph for custom date</string>
+    <string name="historical_title">"Historical for "</string>
 
 
 </resources>

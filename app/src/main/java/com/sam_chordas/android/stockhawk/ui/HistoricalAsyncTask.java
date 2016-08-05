@@ -41,15 +41,17 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     private int startDay, startMonth, startYear;
     private int endDay, endMonth, endYear;
     private LineChart lineChart;
+    private String stockName;
+    private String stockSymbol;
 
     private OkHttpClient client = new OkHttpClient();
     private StringBuilder mStoredSymbols = new StringBuilder();
-    private boolean isUpdate;
 
     private String startDate;
     private final String DAY_COLUMN = "day";
     private final String MONTH_COLUMN = "month";
     private final String YEAR_COLUMN = "year";
+    private final String IS_CURRENT_COLUMN ="is_current";
 
     // This order is given by HistoricalQuoteColumns.java
     final int _ID = 0;
@@ -66,15 +68,22 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     final int YEAR = 11;
 
 
-
     final private int GET_FOR_DATE_RANGE = 0;
+
+    private Cursor dbCursor;
+
+    public HistoricalAsyncTask(Context context, LineChart lineChart) {
+        this.mContext = context;
+        this.lineChart = lineChart;
+    }
+
 
     @Override
     protected Void doInBackground(Void... voids) {
         switch (operation){
             case GET_FOR_DATE_RANGE:
                 fetchHistoricalData();
-                historicalStocksInRange();
+                setdbCursor();
                 break;
 
         }
@@ -92,14 +101,19 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
 
         }
 
+        if (dbCursor != null) {
+            dbCursor.close();
+        }
+
+
 
     }
 
 
-
     //Date Format for vector {dd,MM,yyyy}
-    public void getHistoricalStocksInRange(Context context, int[] startDate, int[] endDate, LineChart lineChart) {
-        this.mContext = context;
+    public void getHistoricalStocksInRange(int[] startDate, int[] endDate,
+                                           String stockSymbol, String stockName) {
+
         operation = GET_FOR_DATE_RANGE;
         this.startDay = startDate[0];
         this.startMonth = startDate[1];
@@ -107,101 +121,72 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         this.endDay = endDate[0];
         this.endMonth = endDate[1];
         this.endYear = endDate[2];
-        this.lineChart = lineChart;
+        this.stockName = stockName;
+        this.stockSymbol = stockSymbol;
 
     }
 
 
-    private void historicalStocksInRange() {
-        String stockSelection = YEAR_COLUMN + " >= ?";
-        String[] selectArgs = {String.valueOf(startYear)};
+    private void setdbCursor() {
 
-/*
-        String stockSelection = DAY_COLUMN + " > ? AND "  + DAY_COLUMN + " < ? AND "
-                + MONTH_COLUMN + " > ? AND " + MONTH_COLUMN + " < ? AND "
-                + YEAR_COLUMN + " > ? AND " + YEAR_COLUMN + " < ?";
+        String stockSelection = IS_CURRENT_COLUMN + " = ?";
+        String[] selectArgs = {String.valueOf(Utils.INT_TRUE)};
 
-        String[] selectArgs = {String.valueOf(startDay),String.valueOf(endDay),
-                String.valueOf(startMonth),String.valueOf(endMonth),
-                String.valueOf(startYear),String.valueOf(endYear)};
-
-        Cursor dbCursor = mContext.getContentResolver().query(
+        dbCursor = mContext.getContentResolver().query(
                 QuoteProvider.Historical.HISTORICAL_URI,
                 null,               // The columns to return for each row
                 stockSelection,     // Selection criteria
                 selectArgs,         // Selection criteria
                 null);              // The sort order for the returned rows
 
-*/
-        Cursor dbCursor = mContext.getContentResolver().query(
-                QuoteProvider.Historical.HISTORICAL_URI,
-                null,               // The columns to return for each row
-                stockSelection,     // Selection criteria
-                selectArgs,         // Selection criteria
-                null);              // The sort order for the returned rows
-
-        if (dbCursor != null && dbCursor.moveToFirst()) {
-
-
-            for (int i = 0; i < dbCursor.getCount(); i++) {
-                Log.e("---test", String.valueOf(dbCursor.getInt(DAY)) + "-"
-                        + String.valueOf(dbCursor.getInt(MONTH)) + "-"
-                        + String.valueOf(dbCursor.getInt(YEAR)));
-                dbCursor.moveToNext();
-
-            }
-            dbCursor.close();
-
-        }
-
-        if (dbCursor != null) {
-            dbCursor.close();
-        }
 
     }
 
     private void setData() {
-        int count = 5;
+        if (dbCursor != null && dbCursor.moveToFirst()) {
 
-        ArrayList<Entry> yVals1 = new ArrayList<Entry>();
+            ArrayList<Entry> yVals1 = new ArrayList<Entry>();
 
-        for (int i = 0; i < count; i++) {
-            float val = (float) 88;
-            yVals1.add(new Entry(i, val));
-        }
+            for (int i = 0; i <  dbCursor.getCount(); i++) {
+                String cursorVal = dbCursor.getString(CLOSE);
+                float val = Float.parseFloat(cursorVal);
+                yVals1.add(new Entry(i, val));
+                dbCursor.moveToNext();
+            }
 
-        LineDataSet set1;
+            LineDataSet set1;
 
-        if (lineChart.getData() != null &&
-                lineChart.getData().getDataSetCount() > 0) {
-            set1 = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
-            set1.setValues(yVals1);
+            if (lineChart.getData() != null &&
+                    lineChart.getData().getDataSetCount() > 0) {
+                set1 = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
+                set1.setValues(yVals1);
 
-            lineChart.getData().notifyDataChanged();
-            lineChart.notifyDataSetChanged();
-        } else {
-            // create a dataset and give it a type
-            set1 = new LineDataSet(yVals1, "DataSet 1");
-            set1.setAxisDependency(YAxis.AxisDependency.LEFT);
-            set1.setColor(ColorTemplate.getHoloBlue());
-            set1.setCircleColor(Color.WHITE);
-            set1.setLineWidth(2f);
-            set1.setCircleRadius(3f);
-            set1.setFillAlpha(65);
-            set1.setFillColor(ColorTemplate.getHoloBlue());
-            set1.setHighLightColor(Color.rgb(244, 117, 117));
-            set1.setDrawCircleHole(false);
+                lineChart.getData().notifyDataChanged();
+                lineChart.notifyDataSetChanged();
+            } else {
+                // create a dataset and give it a type
+                set1 = new LineDataSet(yVals1, "DataSet 1");
+                set1.setAxisDependency(YAxis.AxisDependency.LEFT);
+                set1.setColor(ColorTemplate.getHoloBlue());
+                set1.setCircleColor(Color.WHITE);
+                set1.setLineWidth(2f);
+                set1.setCircleRadius(3f);
+                set1.setFillAlpha(65);
+                set1.setFillColor(ColorTemplate.getHoloBlue());
+                set1.setHighLightColor(Color.rgb(244, 117, 117));
+                set1.setDrawCircleHole(false);
 
-            ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-            dataSets.add(set1); // add the datasets
+                ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                dataSets.add(set1); // add the datasets
 
-            // create a data object with the datasets
-            LineData data = new LineData(dataSets);
-            data.setValueTextColor(Color.WHITE);
-            data.setValueTextSize(9f);
+                // create a data object with the datasets
+                LineData data = new LineData(dataSets);
+                data.setValueTextColor(Color.WHITE);
+                data.setValueTextSize(9f);
 
-            // set data
-            lineChart.setData(data);
+                // set data
+                lineChart.setData(data);
+            }
         }
     }
 
@@ -265,60 +250,38 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             e.printStackTrace();
         }
 
-        isUpdate = true;
         initQueryCursor = mContext.getContentResolver()
                 .query(QuoteProvider.Historical.HISTORICAL_URI,
                         null,
                         null,
                         null,
                         null);
-            /*
-            initQueryCursor = mContext.getContentResolver()
-                    .query(QuoteProvider.Historical.HISTORICAL_URI,
-                            new String[]{"Distinct " + HistoricalQuoteColumns.DATE},
-                            null,
-                            null,
-                            null);*/
 
         // Init task. Populates DB with quotes for the symbols seen below
         try {
+            String sDay = String.format("%02d", startDay);
+            String sMonth = String.format("%02d", startMonth);
+            String eDay = String.format("%02d", endDay);
+            String eMonth = String.format("%02d", endMonth);
+
+            String startDate = startYear + "-" + sMonth + "-" + sDay;
+            String endDate = endYear + "-" + eMonth + "-" + eDay;
+
+            String symbol = "\"" + stockSymbol +"\")";
+            startDate = "\""+ startDate + "\"";
+            endDate = "\""+ endDate + "\"";
+
             urlStringBuilder.append(
-                    URLEncoder.encode("\"YHOO\")", "UTF-8"));
+                    URLEncoder.encode(symbol, "UTF-8"));
             urlStringBuilder.append(
                     //Please consult https://developer.yahoo.com/yql/guide/yql-execute-intro-ratelimits.html for rate limits
                     // It is preferred to request year by year
                     //TODO FIX
-                    URLEncoder.encode("and startDate = \"2015-02-11\"" +
-                            "and endDate   = \"2016-02-11\"", "UTF-8"));
+                    URLEncoder.encode("and startDate = " + startDate +
+                            "and endDate   = " + endDate, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        /*
-        if (initQueryCursor != null) {
-            if (initQueryCursor.getCount() == 0) {
-
-            } else {
-                //TODO print to system out
-                //DatabaseUtils.dumpCursor(initQueryCursor);
-                initQueryCursor.moveToFirst();
-                for (int i = 0; i < initQueryCursor.getCount(); i++) {
-                    mStoredSymbols.append("\"" +
-                            initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol")) + "\",");
-                    initQueryCursor.moveToNext();
-                }
-
-
-                mStoredSymbols.replace(mStoredSymbols.length() - 1, mStoredSymbols.length(), ")");
-                try {
-                    urlStringBuilder.append(URLEncoder.encode(mStoredSymbols.toString(), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        }
-*/
 
         // finalize the URL for the API query.
         urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
@@ -337,16 +300,15 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
 
                 try {
                     ContentValues contentValues = new ContentValues();
-                    // update ISCURRENT to 0 (false) so new data is current
-                    if (isUpdate) {
-                        contentValues.put(HistoricalQuoteColumns.ISCURRENT, 0);
-                        mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
-                                contentValues,
-                                null,
-                                null);
-                    }
+
+                    contentValues.put(HistoricalQuoteColumns.IS_CURRENT, Utils.INT_FALSE);
+                    mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
+                            contentValues,
+                            null,
+                            null);
+
                     mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
-                            Utils.quoteHistoricalJsonToContentVals(getResponse));
+                            Utils.quoteHistoricalJsonToContentVals(getResponse,mContext,stockSymbol));
                 } catch (RemoteException | OperationApplicationException e) {
                     Log.e("StockHawk", "Error applying batch insert", e);
                 }

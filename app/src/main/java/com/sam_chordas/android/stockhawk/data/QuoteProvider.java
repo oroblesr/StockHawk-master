@@ -53,8 +53,8 @@ public class QuoteProvider {
     public static class Historical {
         @ContentUri(
                 path = Path.HISTORICAL,
-                type = "vnd.android.cursor.dir/historical"
-        )
+                type = "vnd.android.cursor.dir/historical",
+                defaultSort = HistoricalQuoteColumns.MILLIS_EPOCH + " ASC" )
         public static final Uri HISTORICAL_URI = buildUri(Path.HISTORICAL);
 
         @InexactContentUri(

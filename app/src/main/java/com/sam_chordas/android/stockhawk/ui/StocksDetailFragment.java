@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.sam_chordas.android.stockhawk.R;
@@ -69,6 +70,8 @@ public class StocksDetailFragment extends Fragment {
         stockName = intent.getStringExtra(Utils.NAME_INTENT);
         stockSymbol = intent.getStringExtra(Utils.SYMBOL_INTENT);
 
+        getActivity().setTitle(getContext().getString(R.string.historical_title) + stockName);
+
     }
 
     @Override
@@ -84,6 +87,7 @@ public class StocksDetailFragment extends Fragment {
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         mContext = getContext();
 
+
         boolean isTablet = getResources().getBoolean(R.bool.isTablet);
         if (isTablet){
             setTabletLayout(rootView);
@@ -95,7 +99,7 @@ public class StocksDetailFragment extends Fragment {
         lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
         // TODO correct description
         lineChart.setDescription("This a test");
-        lineChart.setNoDataTextDescription("You need to provide data for the chart.");
+        lineChart.setNoDataTextDescription(mContext.getString(R.string.no_data_text_description));
 
         // enable touch gestures
         lineChart.setTouchEnabled(true);
@@ -136,8 +140,8 @@ public class StocksDetailFragment extends Fragment {
                 startDate = new int[]{startDay, startMonth, startYear};
                 endDate = new int[] {endDay,endMonth,endYear};
 
-                HistoricalAsyncTask historicalDB = new HistoricalAsyncTask();
-                historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate, lineChart);
+                HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
+                historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
                 historicalDB.execute();
 
             }
@@ -217,8 +221,8 @@ public class StocksDetailFragment extends Fragment {
             startDate = new int[]{startDay, startMonth, startYear};
             endDate = new int[] {endDay,endMonth,endYear};
 
-            HistoricalAsyncTask historicalDB = new HistoricalAsyncTask();
-            historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate, lineChart);
+            HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
+            historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
             historicalDB.execute();
 
         }
@@ -251,8 +255,8 @@ public class StocksDetailFragment extends Fragment {
             startDate = new int[]{startDay, startMonth, startYear};
             endDate = new int[] {endDay,endMonth,endYear};
 
-            HistoricalAsyncTask historicalDB = new HistoricalAsyncTask();
-            historicalDB.getHistoricalStocksInRange(getContext(),startDate, endDate, lineChart);
+            HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
+            historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
             historicalDB.execute();
 
         }

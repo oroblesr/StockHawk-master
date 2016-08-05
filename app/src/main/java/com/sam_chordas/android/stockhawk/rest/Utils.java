@@ -1,6 +1,8 @@
 package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.sam_chordas.android.stockhawk.data.HistoricalQuoteColumns;
@@ -33,10 +35,16 @@ public class Utils {
     private final static String YQL_RESULTS = "results";
     private final static String YQL_QUOTE = "quote";
 
-    public static String SYMBOL_INTENT = "symbol";
-    public static String NAME_INTENT = "name";
+    private final static String YQL_DATE_FORMAT = "yyyy-MM-dd";
 
-    private static String LOG_TAG = Utils.class.getSimpleName();
+
+    public final static String SYMBOL_INTENT = "symbol";
+    public final static String NAME_INTENT = "name";
+
+    public static int INT_FALSE = 0;
+    public static int INT_TRUE = 1;
+
+    public static String LOG_TAG = Utils.class.getSimpleName();
 
     public static boolean showPercent = true;
 
@@ -82,13 +90,14 @@ public class Utils {
     }
 
 
-    public static ArrayList quoteHistoricalJsonToContentVals(String JSON) {
+    public static ArrayList quoteHistoricalJsonToContentVals(String JSON, Context context,
+                                                             String symbol) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
         try {
             jsonObject = new JSONObject(JSON);
-            if (jsonObject != null && jsonObject.length() != 0) {
+            if (jsonObject.length() != 0) {
                 jsonObject = jsonObject.getJSONObject(YQL_QUERY);
                 int count = Integer.parseInt(jsonObject.getString(YQL_COUNT));
                 if (count < 1) {
@@ -98,13 +107,17 @@ public class Utils {
                 else if (count == 1) {
                     jsonObject = jsonObject.getJSONObject(YQL_RESULTS)
                             .getJSONObject(YQL_QUOTE);
+                    if (!entryExists(jsonObject, context, symbol)) {
                         batchOperations.add(buildHistoricalBatchOperation(jsonObject));
+                    }
                 } else {
                     resultsArray = jsonObject.getJSONObject(YQL_RESULTS).getJSONArray(YQL_QUOTE);
                     if (resultsArray != null && resultsArray.length() != 0) {
                         for (int i = 0; i < resultsArray.length(); i++) {
                             jsonObject = resultsArray.getJSONObject(i);
+                            if (!entryExists(jsonObject, context, symbol)) {
                                 batchOperations.add(buildHistoricalBatchOperation(jsonObject));
+                            }
                         }
                     }
                 }
@@ -114,6 +127,53 @@ public class Utils {
         }
         return batchOperations;
     }
+
+
+
+    private static boolean entryExists(JSONObject jsonObject, Context context, String symbol) {
+        final String YQL_DATE = "Date";
+        final String MILLIS_COLUMN = "millis_epoch";
+        final String SYMBOL_COLUMN = "symbol";
+        final int MILLIS_EPOCH = 0;
+        final int SYMBOL = 1;
+
+        try {
+            String date = jsonObject.getString(YQL_DATE);
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(YQL_DATE_FORMAT);
+            Long millisEpoch = dateTimeFormatter.parseMillis(date);
+
+            String stockSelection = MILLIS_COLUMN + " = ?" + " AND " + SYMBOL_COLUMN + " = ? ";
+            String[] selectArgs = {Long.toString(millisEpoch), symbol};
+
+
+            Cursor dbCursor = context.getContentResolver().query(
+                    QuoteProvider.Historical.HISTORICAL_URI,
+                    new String[] {MILLIS_COLUMN,SYMBOL_COLUMN}, // The columns to return for each row
+                    stockSelection,     // Selection criteria
+                    selectArgs,               // Selection criteria
+                    null);              // The sort order for the returned rows
+
+            if (dbCursor != null && dbCursor.moveToFirst()){
+                if (millisEpoch == dbCursor.getLong(MILLIS_EPOCH)
+                        && symbol.equals(dbCursor.getString(SYMBOL))) {
+                    dbCursor.close();
+                    return true;
+                }
+            }
+
+            if (dbCursor != null) {
+                dbCursor.close();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+        return false;
+    }
+
 
 
     public static boolean isJSONNull(JSONObject jsonObject) {
@@ -128,11 +188,12 @@ public class Utils {
 
 
 
-
     public static String truncateBidPrice(String bidPrice) {
-        if (bidPrice != null){
-            bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
+        //TODO Correct solution
+        if (bidPrice.equals("null")){
+            return "0";
         }
+        bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
         return bidPrice;
     }
 
@@ -143,8 +204,12 @@ public class Utils {
             ampersand = change.substring(change.length() - 1, change.length());
             change = change.substring(0, change.length() - 1);
         }
+        // TODO Check if correct
         change = change.substring(1, change.length());
         double round = (double) Math.round(Double.parseDouble(change) * 100) / 100;
+
+
+
         change = String.format("%.2f", round);
         StringBuffer changeBuffer = new StringBuffer(change);
         changeBuffer.insert(0, weight);
@@ -171,11 +236,11 @@ public class Utils {
             builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
                     jsonObject.getString(YQL_CHANGE_IN_PERCENT), true));
             builder.withValue(QuoteColumns.CHANGE, truncateChange(change, false));
-            builder.withValue(QuoteColumns.ISCURRENT, 1);
+            builder.withValue(QuoteColumns.ISCURRENT, INT_TRUE);
             if (change.charAt(0) == '-') {
-                builder.withValue(QuoteColumns.ISUP, 0);
+                builder.withValue(QuoteColumns.ISUP, INT_FALSE);
             } else {
-                builder.withValue(QuoteColumns.ISUP, 1);
+                builder.withValue(QuoteColumns.ISUP, INT_TRUE);
             }
             builder.withValue(QuoteColumns.NAME, jsonObject.getString(YQL_NAME));
 
@@ -194,20 +259,24 @@ public class Utils {
         final String YQL_LOW = "Low";
         final String YQL_CLOSE = "Close";
         final String YQL_VOLUME = "Volume";
-        final String YQL_DATE_FORMAT = "yyyy-MM-dd";
 
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                 QuoteProvider.Historical.HISTORICAL_URI);
         try {
-            builder.withValue(HistoricalQuoteColumns.SYMBOL, jsonObject.getString(YQL_SYMBOL));
             String date = jsonObject.getString(YQL_DATE);
-
             DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(YQL_DATE_FORMAT);
+
             DateTime jodaTime = dateTimeFormatter.parseDateTime(date);
 
             int year = jodaTime.getYear();
             int month = jodaTime.getMonthOfYear();
             int day = jodaTime.getDayOfMonth();
+
+            long millis_epoch = dateTimeFormatter.parseMillis(date);
+
+            builder.withValue(HistoricalQuoteColumns.SYMBOL, jsonObject.getString(YQL_SYMBOL));
+
+            builder.withValue(HistoricalQuoteColumns.MILLIS_EPOCH, millis_epoch);
 
             builder.withValue(HistoricalQuoteColumns.DATE,date );
 
@@ -228,7 +297,7 @@ public class Utils {
                     truncateBidPrice(jsonObject.getString(YQL_CLOSE)));
 
             builder.withValue(HistoricalQuoteColumns.VOLUME, jsonObject.getInt(YQL_VOLUME));
-            builder.withValue(HistoricalQuoteColumns.ISCURRENT, 1);
+            builder.withValue(HistoricalQuoteColumns.IS_CURRENT, INT_TRUE);
 
         } catch (JSONException e) {
             e.printStackTrace();
