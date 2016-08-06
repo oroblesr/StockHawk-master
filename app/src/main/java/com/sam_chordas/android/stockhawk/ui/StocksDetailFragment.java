@@ -12,10 +12,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.rest.Utils;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -118,19 +123,17 @@ public class StocksDetailFragment extends Fragment {
         Button lastYearButton = (Button) rootView.findViewById(R.id.last_year_button);
 
         Button dateButton = (Button) rootView.findViewById(R.id.date_button);
-        //TODO SET predefined date
-        // TODO validate end > start
 
         dateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int startDay, startMonth, startYear;
                 int endDay, endMonth, endYear;
+                startYear = startDatePicker.getYear();
 
                 startDay = startDatePicker.getDayOfMonth();
                 // Months in DatePicker are indexed starting at 0
                 startMonth = startDatePicker.getMonth() + 1;
-                startYear = startDatePicker.getYear();
 
                 endDay = endDatePicker.getDayOfMonth();
                 // Months in DatePicker are indexed starting at 0
@@ -140,9 +143,17 @@ public class StocksDetailFragment extends Fragment {
                 startDate = new int[]{startDay, startMonth, startYear};
                 endDate = new int[] {endDay,endMonth,endYear};
 
-                HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
-                historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
-                historicalDB.execute();
+
+                if (Utils.getEpochTime(endDate) < Utils.getEpochTime(startDate)) {
+                    Toast toast = Toast.makeText(getContext(), getString(R.string.wrong_date), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else {
+                    HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
+                    historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
+                    historicalDB.execute();
+                }
+
 
             }
         });
@@ -151,7 +162,13 @@ public class StocksDetailFragment extends Fragment {
         lastYearButton.setOnClickListener(yearButtonListener);
     }
 
+
+
     void setPhoneLayout(View rootView) {
+        final int[] startInts = new int[3];
+        final int[] endInts = new int[3];
+        final TextView startText = (TextView) rootView.findViewById(R.id.start_date_text);
+        final TextView endText = (TextView) rootView.findViewById(R.id.end_date_text);
 
         Button startDateButton = (Button) rootView.findViewById(R.id.start_date_button);
         Button endDateButton = (Button) rootView.findViewById(R.id.end_date_button);
@@ -160,26 +177,66 @@ public class StocksDetailFragment extends Fragment {
         Button lastYearButton = (Button) rootView.findViewById(R.id.last_year_button);
 
         startDateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                DialogFragment dialogFragment = new DatePickerFragment();
-                dialogFragment.show(getFragmentManager(), "datePicker");
+            @Override
+            public void onClick(final View v) {
+                DialogFragment newFragment = new DatePickerFragment() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
+                        startInts[0] = day;
+                        startInts[1] = month + 1;
+                        startInts[2] = year;
+
+                        startText.setText(getFormatedDate(startInts));
+                    }
+                };
+                newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
             }
         });
 
 
         endDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
+                DialogFragment newFragment = new DatePickerFragment() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
+                        endInts[0] = day;
+                        endInts[1] = month + 1;
+                        endInts[2] = year;
 
-                DialogFragment dialogFragment = new DatePickerFragment();
-                dialogFragment.show(getFragmentManager(), "datePicker");
+                        endText.setText(getFormatedDate(endInts));
+                    }
+                };
+                newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
             }
         });
 
         lastMonthButton.setOnClickListener(monthButtonListener);
         lastYearButton.setOnClickListener(yearButtonListener);
+
+
+
+        Button dateButton = (Button) rootView.findViewById(R.id.date_button);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startDate = startInts;
+                endDate = endInts;
+
+                if (Utils.getEpochTime(endDate) < Utils.getEpochTime(startDate)) {
+                    Toast toast = Toast.makeText(getContext(), getString(R.string.wrong_date), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else {
+                    HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
+                    historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
+                    historicalDB.execute();
+                }
+
+            }
+        });
     }
 
     private View.OnClickListener monthButtonListener = new View.OnClickListener() {
@@ -262,5 +319,17 @@ public class StocksDetailFragment extends Fragment {
         }
     };
 
+
+    private String getFormatedDate (int[] arrayDate){
+        final  String DATE_FORMAT = "yyyy-MM-dd";
+
+        String dd = String.format("%02d", arrayDate[0]);
+        String MM = String.format("%02d", arrayDate[1]);
+        String YYYY = String.format("%04d", arrayDate[2]);
+
+        String date = YYYY + "-" + MM + "-" + dd;
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT);
+        return dateTimeFormatter.parseDateTime(date).toString();
+    }
 
 }

@@ -26,6 +26,9 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -40,6 +43,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     private int operation;
     private int startDay, startMonth, startYear;
     private int endDay, endMonth, endYear;
+
     private LineChart lineChart;
     private String stockName;
     private String stockSymbol;
@@ -47,11 +51,18 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     private OkHttpClient client = new OkHttpClient();
     private StringBuilder mStoredSymbols = new StringBuilder();
 
-    private String startDate;
-    private final String DAY_COLUMN = "day";
-    private final String MONTH_COLUMN = "month";
-    private final String YEAR_COLUMN = "year";
+    private int[] startDate;
+    private int[] endDate;
+
     private final String IS_CURRENT_COLUMN ="is_current";
+
+    private final int MILLIS_IN_SECOND = 1000;
+    private final int SECONDS_IN_MINUTE = 60;
+    private final int MINUTES_IN_HOUR = 60;
+    private final int HOURS_IN_DAY = 24;
+    private final int DAYS_IN_YEAR = 365;
+    final Long ONE_YEAR_IN_MILLIS = (long) MILLIS_IN_SECOND * SECONDS_IN_MINUTE *
+            MINUTES_IN_HOUR * HOURS_IN_DAY * DAYS_IN_YEAR ;
 
     // This order is given by HistoricalQuoteColumns.java
     final int _ID = 0;
@@ -82,7 +93,24 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         switch (operation){
             case GET_FOR_DATE_RANGE:
-                fetchHistoricalData();
+                //Please consult https://developer.yahoo.com/yql/guide/yql-execute-intro-ratelimits.html for rate limits
+                // It is preferred to request year by year
+                int startYearPeriod = startYear;
+                int endYearPeriod = endYear;
+                int yearDifference = endYear - startYear;
+                Long differenceInMillis = Utils.getEpochTime(endDate) - Utils.getEpochTime(startDate);
+                if ( differenceInMillis > ONE_YEAR_IN_MILLIS){
+                    for(int i = 0; i < yearDifference ; i ++) {
+                        startYearPeriod = startYear + i;
+                        endYearPeriod = startYear + i + 1;
+
+                        fetchHistoricalData(startYearPeriod, endYearPeriod);
+                    }
+                }
+                else {
+                    fetchHistoricalData(startYearPeriod, endYearPeriod);
+                }
+
                 setdbCursor();
                 break;
 
@@ -97,6 +125,13 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             case GET_FOR_DATE_RANGE:
                 setData();
                 setChart();
+                ContentValues contentValues = new ContentValues();
+
+                contentValues.put(HistoricalQuoteColumns.IS_CURRENT, Utils.INT_FALSE);
+                mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
+                        contentValues,
+                        null,
+                        null);
                 break;
 
         }
@@ -115,6 +150,8 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
                                            String stockSymbol, String stockName) {
 
         operation = GET_FOR_DATE_RANGE;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.startDay = startDate[0];
         this.startMonth = startDate[1];
         this.startYear = startDate[2];
@@ -237,7 +274,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         return response.body().string();
     }
 
-    private int fetchHistoricalData(){
+    private int fetchHistoricalData(int startYearPeriod, int endYearPeriod){
         Cursor initQueryCursor = null;
 
         StringBuilder urlStringBuilder = new StringBuilder();
@@ -257,6 +294,8 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
                         null,
                         null);
 
+
+
         // Init task. Populates DB with quotes for the symbols seen below
         try {
             String sDay = String.format("%02d", startDay);
@@ -264,8 +303,8 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             String eDay = String.format("%02d", endDay);
             String eMonth = String.format("%02d", endMonth);
 
-            String startDate = startYear + "-" + sMonth + "-" + sDay;
-            String endDate = endYear + "-" + eMonth + "-" + eDay;
+            String startDate = startYearPeriod + "-" + sMonth + "-" + sDay;
+            String endDate = endYearPeriod + "-" + eMonth + "-" + eDay;
 
             String symbol = "\"" + stockSymbol +"\")";
             startDate = "\""+ startDate + "\"";
@@ -274,9 +313,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             urlStringBuilder.append(
                     URLEncoder.encode(symbol, "UTF-8"));
             urlStringBuilder.append(
-                    //Please consult https://developer.yahoo.com/yql/guide/yql-execute-intro-ratelimits.html for rate limits
-                    // It is preferred to request year by year
-                    //TODO FIX
+
                     URLEncoder.encode("and startDate = " + startDate +
                             "and endDate   = " + endDate, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
@@ -299,13 +336,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
                 result = GcmNetworkManager.RESULT_SUCCESS;
 
                 try {
-                    ContentValues contentValues = new ContentValues();
 
-                    contentValues.put(HistoricalQuoteColumns.IS_CURRENT, Utils.INT_FALSE);
-                    mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
-                            contentValues,
-                            null,
-                            null);
 
                     mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                             Utils.quoteHistoricalJsonToContentVals(getResponse,mContext,stockSymbol));
@@ -317,8 +348,6 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             }
         }
 
-
-
         try {
             if (initQueryCursor != null && !initQueryCursor.isClosed()) initQueryCursor.close();
         } catch (Exception e) {
@@ -328,6 +357,5 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
 
         return result;
     }
-
 
 }

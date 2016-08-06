@@ -305,5 +305,18 @@ public class Utils {
         return builder.build();
     }
 
+    public static Long getEpochTime(int[] arrayDate){
+
+        final  String DATE_FORMAT = "yyyy-MM-dd";
+
+        String dd = String.format("%02d", arrayDate[0]);
+        String MM = String.format("%02d", arrayDate[1]);
+        String YYYY = String.format("%04d", arrayDate[2]);
+
+        String date = YYYY + "-" + MM + "-" + dd;
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT);
+        return dateTimeFormatter.parseMillis(date);
+    }
+
 
 }
