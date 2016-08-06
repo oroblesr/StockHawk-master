@@ -37,5 +37,9 @@
     <string name="show_graph_for_custom_date">Show graph for custom date</string>
     <string name="historical_title">"Historical for "</string>
 
+    <string name="min_in_period">"Min in period: "</string>
+    <string name="max_in_period">"Max in period: "</string>
+
+
 
 </resources>

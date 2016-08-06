@@ -17,16 +17,50 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:columnCount="3"
+            android:columnCount="4"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin">
 
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/min_in_period"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:id="@+id/min_period" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:id="@+id/min_period_text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/max_in_period"
+                android:layout_row="0"
+                android:layout_column="2"
+                android:id="@+id/max_period" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="3"
+                android:id="@+id/max_period_text" />
+
+
+
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/line_chart"
                 android:layout_width="0dp"
-                android:layout_columnSpan="3"
+                android:layout_row="1"
+                android:layout_column="0"
+                android:layout_columnSpan="4"
                 android:layout_height="256dp"
                 android:layout_gravity="fill_horizontal" />
 

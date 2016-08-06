@@ -1,5 +1,6 @@
 package com.sam_chordas.android.stockhawk.ui;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
@@ -8,6 +9,8 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -19,6 +22,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.gcm.GcmNetworkManager;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.HistoricalQuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -183,13 +187,32 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         if (dbCursor != null && dbCursor.moveToFirst()) {
 
             ArrayList<Entry> yVals1 = new ArrayList<Entry>();
+            View rootView = (View) ((Activity)mContext).getWindow().getDecorView()
+                    .findViewById(android.R.id.content);
+
+            TextView minText = (TextView) rootView.findViewById(R.id.min_period_text);
+            TextView maxText = (TextView) rootView.findViewById(R.id.max_period_text);
+            
+            float initValue = Float.parseFloat(dbCursor.getString(CLOSE));
+
+            float minInPeriod = initValue;
+            float maxInPeriod = initValue;
 
             for (int i = 0; i <  dbCursor.getCount(); i++) {
                 String cursorVal = dbCursor.getString(CLOSE);
                 float val = Float.parseFloat(cursorVal);
                 yVals1.add(new Entry(i, val));
                 dbCursor.moveToNext();
+                if (val < minInPeriod){
+                    minInPeriod = val;
+                }
+                else if (val > maxInPeriod){
+                    maxInPeriod = val;
+                }
             }
+
+            minText.setText(String.valueOf(minInPeriod));
+            maxText.setText(String.valueOf(maxInPeriod));
 
             LineDataSet set1;
 
