@@ -38,6 +38,13 @@ public class StocksDetailFragment extends Fragment {
     String stockSymbol;
     String stockName;
 
+    TextView startText;
+    TextView endText;
+
+    private final String START_KEY = "start";
+    private final String END_KEY = "end";
+
+
     // Please note that Month value is 0-based. e.g., 0 for January.
     final int JAN = 0;
     final int FEB = 1;
@@ -71,6 +78,8 @@ public class StocksDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         Intent intent = getActivity().getIntent();
         stockName = intent.getStringExtra(Utils.NAME_INTENT);
         stockSymbol = intent.getStringExtra(Utils.SYMBOL_INTENT);
@@ -87,11 +96,20 @@ public class StocksDetailFragment extends Fragment {
 
 
 
-
     @Override
     public void onViewCreated(View rootView, Bundle savedInstanceState) {
         mContext = getContext();
+        lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
 
+        HistoricalAsyncTask historicalAsyncTask = new HistoricalAsyncTask(getContext(), lineChart);
+        historicalAsyncTask.checkIfCurrent(stockSymbol,stockName);
+        historicalAsyncTask.execute();
+
+
+        if (savedInstanceState != null) {
+            startDate = savedInstanceState.getIntArray(START_KEY);
+            endDate = savedInstanceState.getIntArray(END_KEY);
+        }
 
         boolean isTablet = getResources().getBoolean(R.bool.isTablet);
         if (isTablet){
@@ -101,7 +119,6 @@ public class StocksDetailFragment extends Fragment {
             setPhoneLayout(rootView);
         }
 
-        lineChart = (LineChart) rootView.findViewById(R.id.line_chart);
         // TODO correct description
         lineChart.setDescription("This a test");
         lineChart.setNoDataTextDescription(mContext.getString(R.string.no_data_text_description));
@@ -113,6 +130,21 @@ public class StocksDetailFragment extends Fragment {
 
 
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (startDate != null){
+            outState.putIntArray(START_KEY,startDate);
+        }
+        if (endDate != null){
+            outState.putIntArray(END_KEY,endDate);
+        }
+
+    }
+
 
     void setTabletLayout(View rootView) {
 
@@ -165,16 +197,21 @@ public class StocksDetailFragment extends Fragment {
 
 
     void setPhoneLayout(View rootView) {
-        final int[] startInts = new int[3];
-        final int[] endInts = new int[3];
-        final TextView startText = (TextView) rootView.findViewById(R.id.start_date_text);
-        final TextView endText = (TextView) rootView.findViewById(R.id.end_date_text);
+        startText = (TextView) rootView.findViewById(R.id.start_date_text);
+        endText = (TextView) rootView.findViewById(R.id.end_date_text);
 
         Button startDateButton = (Button) rootView.findViewById(R.id.start_date_button);
         Button endDateButton = (Button) rootView.findViewById(R.id.end_date_button);
 
         Button lastMonthButton = (Button) rootView.findViewById(R.id.last_month_button);
         Button lastYearButton = (Button) rootView.findViewById(R.id.last_year_button);
+
+        if (startDate != null){
+            startText.setText(getFormatedDate(startDate));
+        }
+        if (endDate != null){
+            endText.setText(getFormatedDate(endDate));
+        }
 
         startDateButton.setOnClickListener(new View.OnClickListener() {
 
@@ -183,17 +220,17 @@ public class StocksDetailFragment extends Fragment {
                 DialogFragment newFragment = new DatePickerFragment() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int day) {
-                        startInts[0] = day;
-                        startInts[1] = month + 1;
-                        startInts[2] = year;
+                        startDate = new int[3];
+                        startDate[0] = day;
+                        startDate[1] = month + 1;
+                        startDate[2] = year;
 
-                        startText.setText(getFormatedDate(startInts));
+                        startText.setText(getFormatedDate(startDate));
                     }
                 };
                 newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
             }
         });
-
 
         endDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,11 +238,12 @@ public class StocksDetailFragment extends Fragment {
                 DialogFragment newFragment = new DatePickerFragment() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int day) {
-                        endInts[0] = day;
-                        endInts[1] = month + 1;
-                        endInts[2] = year;
+                        endDate = new int[3];
+                        endDate[0] = day;
+                        endDate[1] = month + 1;
+                        endDate[2] = year;
 
-                        endText.setText(getFormatedDate(endInts));
+                        endText.setText(getFormatedDate(endDate));
                     }
                 };
                 newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
@@ -222,8 +260,6 @@ public class StocksDetailFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                startDate = startInts;
-                endDate = endInts;
 
                 if (Utils.getEpochTime(endDate) < Utils.getEpochTime(startDate)) {
                     Toast toast = Toast.makeText(getContext(), getString(R.string.wrong_date), Toast.LENGTH_SHORT);

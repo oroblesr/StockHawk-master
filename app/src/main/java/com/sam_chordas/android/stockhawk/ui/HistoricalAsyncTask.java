@@ -82,8 +82,11 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     final int MONTH = 10;
     final int YEAR = 11;
 
+    private boolean infoInCursor = false;
 
     final private int GET_FOR_DATE_RANGE = 0;
+    final private int CHECK_IF_CURRENT = 1;
+
 
     private Cursor dbCursor;
 
@@ -93,10 +96,20 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
 
+
     @Override
     protected Void doInBackground(Void... voids) {
         switch (operation){
             case GET_FOR_DATE_RANGE:
+
+                ContentValues contentValues = new ContentValues();
+
+                contentValues.put(HistoricalQuoteColumns.IS_CURRENT, Utils.INT_FALSE);
+                mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
+                        contentValues,
+                        null,
+                        null);
+
                 //Please consult https://developer.yahoo.com/yql/guide/yql-execute-intro-ratelimits.html for rate limits
                 // It is preferred to request year by year
                 int startYearPeriod = startYear;
@@ -115,8 +128,12 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
                     fetchHistoricalData(startYearPeriod, endYearPeriod);
                 }
 
-                setdbCursor();
+                infoInCursor = setdbCursor();
                 break;
+            case CHECK_IF_CURRENT:
+                infoInCursor = setdbCursor();
+                break;
+
 
         }
         return null;
@@ -125,20 +142,13 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        switch (operation){
-            case GET_FOR_DATE_RANGE:
-                setData();
-                setChart();
-                ContentValues contentValues = new ContentValues();
-
-                contentValues.put(HistoricalQuoteColumns.IS_CURRENT, Utils.INT_FALSE);
-                mContext.getContentResolver().update(QuoteProvider.Historical.HISTORICAL_URI,
-                        contentValues,
-                        null,
-                        null);
-                break;
-
+        if (infoInCursor){
+            setData();
+            setChart();
         }
+
+
+
 
         if (dbCursor != null) {
             dbCursor.close();
@@ -149,11 +159,16 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
 
+    public void checkIfCurrent(String stockSymbol, String stockName){
+        this.operation = CHECK_IF_CURRENT;
+        this.stockName = stockName;
+        this.stockSymbol = stockSymbol;
+    }
     //Date Format for vector {dd,MM,yyyy}
     public void getHistoricalStocksInRange(int[] startDate, int[] endDate,
                                            String stockSymbol, String stockName) {
 
-        operation = GET_FOR_DATE_RANGE;
+        this.operation = GET_FOR_DATE_RANGE;
         this.startDate = startDate;
         this.endDate = endDate;
         this.startDay = startDate[0];
@@ -168,7 +183,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
 
-    private void setdbCursor() {
+    private boolean setdbCursor() {
 
         String stockSelection = IS_CURRENT_COLUMN + " = ?";
         String[] selectArgs = {String.valueOf(Utils.INT_TRUE)};
@@ -180,6 +195,11 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
                 selectArgs,         // Selection criteria
                 null);              // The sort order for the returned rows
 
+        if (dbCursor != null && dbCursor.moveToFirst()){
+            return true;
+
+        }
+        return false;
 
     }
 
