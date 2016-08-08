@@ -87,6 +87,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
 
     final private int GET_FOR_DATE_RANGE = 0;
     final private int CHECK_IF_CURRENT = 1;
+    final private int CHECK_IF_CURRENT_OR_AVAILABLE = 2;
 
 
     private Cursor dbCursor;
@@ -95,7 +96,6 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         this.mContext = context;
         this.lineChart = lineChart;
     }
-
 
 
     @Override
@@ -134,6 +134,13 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             case CHECK_IF_CURRENT:
                 infoInCursor = setdbCursor();
                 break;
+            case CHECK_IF_CURRENT_OR_AVAILABLE:
+                infoInCursor = setdbCursor();
+                if (!infoInCursor) {
+                    infoInCursor = fetchAvaiableData();
+                }
+                break;
+
 
 
         }
@@ -147,8 +154,6 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             setData();
             setChart();
         }
-
-
 
 
         if (dbCursor != null) {
@@ -188,6 +193,27 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
 
         String stockSelection = IS_CURRENT_COLUMN + " = ?" + "AND " + SYMBOL_COLUMN +" = ?";
         String[] selectArgs = {String.valueOf(Utils.INT_TRUE), stockSymbol};
+
+        dbCursor = mContext.getContentResolver().query(
+                QuoteProvider.Historical.HISTORICAL_URI,
+                null,               // The columns to return for each row
+                stockSelection,     // Selection criteria
+                selectArgs,         // Selection criteria
+                null);              // The sort order for the returned rows
+
+        if (dbCursor != null && dbCursor.moveToFirst()){
+            return true;
+
+        }
+        return false;
+
+    }
+
+
+    private boolean fetchAvaiableData() {
+
+        String stockSelection = SYMBOL_COLUMN +" = ?";
+        String[] selectArgs = {stockSymbol};
 
         dbCursor = mContext.getContentResolver().query(
                 QuoteProvider.Historical.HISTORICAL_URI,
@@ -402,4 +428,10 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         return result;
     }
 
+    public void checkIfCurrentOrAvailable(String stockSymbol, String stockName) {
+        this.operation = CHECK_IF_CURRENT_OR_AVAILABLE;
+        this.stockName = stockName;
+        this.stockSymbol = stockSymbol;
+
+    }
 }
