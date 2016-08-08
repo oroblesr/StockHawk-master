@@ -22,4 +22,10 @@
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <style name="CustomDateStyle">
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:textColor">@color/material_blue_500</item>
+        <item name="android:textSize">@dimen/md_title_textsize</item>
+    </style>
+
 </resources>

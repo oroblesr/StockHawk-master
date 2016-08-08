@@ -27,6 +27,7 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 /**
  * Created by oroblesr on 7/5/16.
@@ -416,9 +417,11 @@ public class StocksDetailFragment extends Fragment {
         String MM = String.format("%02d", arrayDate[1]);
         String YYYY = String.format("%04d", arrayDate[2]);
 
-        String date = YYYY + "-" + MM + "-" + dd;
+        String dateString = YYYY + "-" + MM + "-" + dd;
         DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT);
-        return dateTimeFormatter.parseDateTime(date).toString();
+        DateTime date = dateTimeFormatter.parseDateTime(dateString);
+        Locale locale = Locale.getDefault();
+        return date.toString("dd-MMM-yy", locale);
     }
 
     public void networkToast() {
