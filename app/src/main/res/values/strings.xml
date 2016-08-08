@@ -45,6 +45,16 @@
     <string name="min_in_period">"Min in period: "</string>
     <string name="max_in_period">"Max in period: "</string>
 
+    <string name="description_add_stock">Add new stock</string>
+    <string name="description_select_stock">Click stock for details</string>
+
+    <string name="description_graph">Graph showing the historical stocks</string>
+    <string name="description_last_month">Get historical stocks for last month</string>
+    <string name="description_last_year">Get historical stocks for last year</string>
+    <string name="description_start_date">Select start date</string>
+    <string name="description_end_date">Select end dater</string>
+    <string name="description_custom_date">Get historical stocks for custom date</string>
+
 
 
 </resources>

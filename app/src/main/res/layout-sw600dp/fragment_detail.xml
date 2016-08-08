@@ -66,7 +66,8 @@
                 android:layout_column="0"
                 android:layout_columnSpan="4"
                 android:layout_height="256dp"
-                android:layout_gravity="fill_horizontal" />
+                android:layout_gravity="fill_horizontal"
+                android:contentDescription="@string/description_graph"/>
 
 
             <Button
