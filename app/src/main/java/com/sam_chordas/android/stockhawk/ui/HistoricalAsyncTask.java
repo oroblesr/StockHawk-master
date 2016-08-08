@@ -59,6 +59,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     private int[] endDate;
 
     private final String IS_CURRENT_COLUMN ="is_current";
+    private final String SYMBOL_COLUMN = "symbol";
 
     private final int MILLIS_IN_SECOND = 1000;
     private final int SECONDS_IN_MINUTE = 60;
@@ -185,8 +186,8 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private boolean setdbCursor() {
 
-        String stockSelection = IS_CURRENT_COLUMN + " = ?";
-        String[] selectArgs = {String.valueOf(Utils.INT_TRUE)};
+        String stockSelection = IS_CURRENT_COLUMN + " = ?" + "AND " + SYMBOL_COLUMN +" = ?";
+        String[] selectArgs = {String.valueOf(Utils.INT_TRUE), stockSymbol};
 
         dbCursor = mContext.getContentResolver().query(
                 QuoteProvider.Historical.HISTORICAL_URI,
