@@ -1,13 +1,20 @@
 package com.sam_chordas.android.stockhawk.rest;
 
+import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.HistoricalQuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.service.StockTaskService;
+import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,7 +55,7 @@ public class Utils {
 
     public static boolean showPercent = true;
 
-    public static ArrayList quoteJsonToContentVals(String JSON) {
+    public static ArrayList quoteJsonToContentVals(String JSON, Context context) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
@@ -63,8 +70,7 @@ public class Utils {
                     if (!isJSONNull(jsonObject)) {
                         batchOperations.add(buildBatchOperation(jsonObject));
                     } else {
-                        //TODO display error message
-                        Log.e("TEST----------", "WRONG WRONG AND WRONG");
+                        noStockToast(context);
                     }
 
                 } else {
@@ -76,8 +82,7 @@ public class Utils {
                             if (!isJSONNull(jsonObject)) {
                                 batchOperations.add(buildBatchOperation(jsonObject));
                             } else {
-                                //TODO display error message
-                                Log.e("TEST----------", "WRONG WRONG AND WRONG");
+                               noStockToast(context);
                             }
                         }
                     }
@@ -101,8 +106,8 @@ public class Utils {
                 jsonObject = jsonObject.getJSONObject(YQL_QUERY);
                 int count = Integer.parseInt(jsonObject.getString(YQL_COUNT));
                 if (count < 1) {
-                    //TODO display Historical error message
-                    Log.e("TEST Historical 1 ----", "WRONG WRONG AND WRONG");
+                    Toast.makeText(context,context.getResources()
+                            .getString(R.string.no_stock_detail_toast),Toast.LENGTH_LONG).show();
                 }
                 else if (count == 1) {
                     jsonObject = jsonObject.getJSONObject(YQL_RESULTS)
@@ -178,7 +183,10 @@ public class Utils {
 
     public static boolean isJSONNull(JSONObject jsonObject) {
         try {
-            jsonObject.getString("Bid");
+            String bid = jsonObject.getString("Bid");
+            if (bid.equals("null")){
+                return true;
+            }
         } catch (JSONException e) {
             return true;
         }
@@ -317,6 +325,21 @@ public class Utils {
         DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT);
         return dateTimeFormatter.parseMillis(date);
     }
+
+
+
+    public static void noStockToast(final Context context) {
+        Handler handler = new Handler(context.getMainLooper());
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context,context.getResources()
+                        .getString(R.string.no_stock_toast),Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 
 
 }
