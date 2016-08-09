@@ -48,8 +48,7 @@ public class StockWidgetProvider extends AppWidgetProvider {
 
             // The empty view is displayed when the collection has no items. It should be a sibling
             // of the collection view.
-            //TODO setEmptyView
-            //remoteViews.setEmptyView(R.id.widget_list, R.id.widget_empty);
+            remoteViews.setEmptyView(R.id.widget_list, R.id.widget_empty);
 
 
             // This section makes it possible for items to have individualized behavior.
