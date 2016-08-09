@@ -1,11 +1,9 @@
 package com.sam_chordas.android.stockhawk.rest;
 
-import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,16 +11,6 @@ import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.HistoricalQuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
-import com.sam_chordas.android.stockhawk.service.StockTaskService;
-import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -30,6 +18,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by sam_chordas on 10/8/15.
@@ -220,7 +211,7 @@ public class Utils {
 
 
         change = String.format("%.2f", round);
-        StringBuffer changeBuffer = new StringBuffer(change);
+        StringBuilder changeBuffer = new StringBuilder(change);
         changeBuffer.insert(0, weight);
         changeBuffer.append(ampersand);
         change = changeBuffer.toString();

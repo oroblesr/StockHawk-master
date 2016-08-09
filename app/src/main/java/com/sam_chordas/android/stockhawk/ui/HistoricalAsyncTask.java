@@ -21,7 +21,6 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.sam_chordas.android.stockhawk.R;
@@ -31,9 +30,6 @@ import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -243,7 +239,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         if (dbCursor != null && dbCursor.moveToFirst()) {
 
             List<Entry> yVals = new ArrayList<>();
-            View rootView = (View) ((Activity)mContext).getWindow().getDecorView()
+            View rootView = ((Activity)mContext).getWindow().getDecorView()
                     .findViewById(android.R.id.content);
 
             TextView minText = (TextView) rootView.findViewById(R.id.min_period_text);
