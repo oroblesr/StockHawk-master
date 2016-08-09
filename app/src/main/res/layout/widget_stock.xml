@@ -20,6 +20,15 @@
             android:layout_gravity="center_horizontal|top"
             android:contentDescription="@string/description_select_stock" />
 
+        <TextView
+            android:id="@+id/widget_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:fontFamily="sans-serif-condensed"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:text="@string/empty_widget"/>
+
     </FrameLayout>
 
 </LinearLayout>

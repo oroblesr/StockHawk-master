@@ -33,8 +33,6 @@
             android:name="com.sam_chordas.android.stockhawk.ui.StocksDetailActivity"
             android:label="@string/stock_detail_name"        >
 
-           <!--TODO android:theme="@style/AppTheme.NoActionBar"-->
-
         </activity>
 
 

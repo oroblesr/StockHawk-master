@@ -11,6 +11,5 @@
     android:widgetCategory="home_screen|keyguard"
     tools:ignore="UnusedAttribute"    />
 
-    <!-- TODO android:previewImage="@drawable/widget_preview" -->
 
 

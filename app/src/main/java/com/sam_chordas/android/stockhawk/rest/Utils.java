@@ -199,7 +199,6 @@ public class Utils {
 
 
     public static String truncateBidPrice(String bidPrice) {
-        //TODO Correct solution
         if (bidPrice.equals("null")){
             return "0";
         }
@@ -214,7 +213,7 @@ public class Utils {
             ampersand = change.substring(change.length() - 1, change.length());
             change = change.substring(0, change.length() - 1);
         }
-        // TODO Check if correct
+
         change = change.substring(1, change.length());
         double round = (double) Math.round(Double.parseDouble(change) * 100) / 100;
 

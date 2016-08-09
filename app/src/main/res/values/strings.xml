@@ -39,5 +39,6 @@
     <string name="description_start_date" translatable="true">Select start date</string>
     <string name="description_end_date" translatable="true">Select end dater</string>
     <string name="description_custom_date" translatable="true">Get historical stocks for custom date</string>
+    <string name="empty_widget" translatable="true">Please open the app with an internet connection</string>
 
 </resources>
