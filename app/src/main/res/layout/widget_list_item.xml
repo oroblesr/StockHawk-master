@@ -6,12 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/material_blue_900"
-    android:paddingStart="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingEnd="10dp"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp">
+    android:paddingStart="@dimen/widget_side_padding"
+    android:paddingLeft="@dimen/widget_side_padding"
+    android:paddingRight="@dimen/widget_side_padding"
+    android:paddingEnd="@dimen/widget_side_padding"
+    android:paddingTop="@dimen/widget_padding"
+    android:paddingBottom="@dimen/widget_padding">
 
     <LinearLayout
         android:orientation="horizontal"

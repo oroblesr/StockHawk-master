@@ -116,7 +116,7 @@ public class MyStocksFragment extends Fragment implements LoaderManager.LoaderCa
                                             new String[]{input.toString()}, null);
                                     if (c.getCount() != 0) {
                                         Toast toast =
-                                                Toast.makeText(getActivity(), "This stock is already saved!",
+                                                Toast.makeText(getActivity(), R.string.stock_already_saved,
                                                         Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                                         toast.show();
