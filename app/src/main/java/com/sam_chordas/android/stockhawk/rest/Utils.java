@@ -343,5 +343,20 @@ public class Utils {
     }
 
 
+    public static String getFormattedDate(int[] arrayDate){
+        final  String DATE_FORMAT = "yyyy-MM-dd";
+
+        String dd = String.format("%02d", arrayDate[0]);
+        String MM = String.format("%02d", arrayDate[1]);
+        String YYYY = String.format("%04d", arrayDate[2]);
+
+        String dateString = YYYY + "-" + MM + "-" + dd;
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT);
+        DateTime date = dateTimeFormatter.parseDateTime(dateString);
+        Locale locale = Locale.getDefault();
+        return date.toString("dd-MMM-yy", locale);
+    }
+
+
 
 }

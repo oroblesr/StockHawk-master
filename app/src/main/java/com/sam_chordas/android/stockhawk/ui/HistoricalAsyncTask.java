@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -37,6 +39,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by oroblesr on 7/19/16.
@@ -89,6 +92,8 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     final private int CHECK_IF_CURRENT = 1;
     final private int CHECK_IF_CURRENT_OR_AVAILABLE = 2;
 
+    private float minInPeriod;
+    private float maxInPeriod;
 
     private Cursor dbCursor;
 
@@ -231,9 +236,11 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     }
 
     private void setData() {
+        List<String> labels = new ArrayList<>();
+
         if (dbCursor != null && dbCursor.moveToFirst()) {
 
-            ArrayList<Entry> yVals1 = new ArrayList<Entry>();
+            List<Entry> yVals = new ArrayList<>();
             View rootView = (View) ((Activity)mContext).getWindow().getDecorView()
                     .findViewById(android.R.id.content);
 
@@ -242,14 +249,27 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             
             float initValue = Float.parseFloat(dbCursor.getString(CLOSE));
 
-            float minInPeriod = initValue;
-            float maxInPeriod = initValue;
+            minInPeriod = initValue;
+            maxInPeriod = initValue;
 
-            for (int i = 0; i <  dbCursor.getCount(); i++) {
+            int totalValues = dbCursor.getCount();
+
+            for (int i = 0; i < totalValues ; i++) {
                 String cursorVal = dbCursor.getString(CLOSE);
                 float val = Float.parseFloat(cursorVal);
-                yVals1.add(new Entry(i, val));
+
+                yVals.add(new Entry(val,i));
+
+                // DAY-MONTH-YEAR
+                String date = Utils.getFormattedDate(new int[]{
+                        dbCursor.getInt(DAY),
+                        dbCursor.getInt(MONTH),
+                        dbCursor.getInt(YEAR)});
+
+                labels.add(date);
+
                 dbCursor.moveToNext();
+
                 if (val < minInPeriod){
                     minInPeriod = val;
                 }
@@ -261,77 +281,67 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
             minText.setText(String.valueOf(minInPeriod));
             maxText.setText(String.valueOf(maxInPeriod));
 
-            LineDataSet set1;
+            LineDataSet lineDataSet;
 
-            if (lineChart.getData() != null &&
-                    lineChart.getData().getDataSetCount() > 0) {
-                set1 = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
-                set1.setValues(yVals1);
+            // create a dataset and give it a type
+            lineDataSet = new LineDataSet(yVals, "DataSet 1");
+            lineDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+            lineDataSet.setColor(ColorTemplate.getHoloBlue());
 
-                lineChart.getData().notifyDataChanged();
-                lineChart.notifyDataSetChanged();
-            } else {
-                // create a dataset and give it a type
-                set1 = new LineDataSet(yVals1, "DataSet 1");
-                set1.setAxisDependency(YAxis.AxisDependency.LEFT);
-                set1.setColor(ColorTemplate.getHoloBlue());
-                set1.setCircleColor(Color.WHITE);
-                set1.setLineWidth(2f);
-                set1.setCircleRadius(3f);
-                set1.setFillAlpha(65);
-                set1.setFillColor(ColorTemplate.getHoloBlue());
-                set1.setHighLightColor(Color.rgb(244, 117, 117));
-                set1.setDrawCircleHole(false);
+            lineDataSet.setCircleColorHole(Color.BLACK);
+            lineDataSet.setDrawFilled(true);
 
-                ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
-                dataSets.add(set1); // add the datasets
+            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.blue_gradient);
+            lineDataSet.setFillDrawable(drawable);
 
-                // create a data object with the datasets
-                LineData data = new LineData(dataSets);
-                data.setValueTextColor(Color.WHITE);
-                data.setValueTextSize(9f);
+            int color = Color.rgb(244, 0, 0);
+            lineDataSet.setHighLightColor(Color.RED);
 
-                // set data
-                lineChart.setData(data);
-            }
+            // create a data object with the datasets
+
+            LineData data = new LineData(labels, lineDataSet);
+            data.setValueTextColor(Color.WHITE);
+            data.setValueTextSize(9f);
+
+            // set data
+            lineChart.setData(data);
         }
     }
 
     private void setChart() {
+        lineChart.setDescription("");
+        lineChart.setNoDataTextDescription(mContext.getString(R.string.no_data_text_description));
+
+        // enable touch gestures
+        lineChart.setTouchEnabled(true);
+
+        // enable scaling and dragging
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(true);
+
         lineChart.animateX(2500);
 
         // get the legend (only possible after setting data)
-        Legend l = lineChart.getLegend();
-
-        // modify the legend ...
-        l.setForm(Legend.LegendForm.LINE);
-        l.setTextSize(11f);
-        l.setTextColor(Color.WHITE);
-        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
+        Legend legend = lineChart.getLegend();
+        legend.setEnabled(false);
 
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextSize(11f);
+
         xAxis.setTextColor(Color.WHITE);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
 
-        //TODO
-        float yAxisMaxValue = 100f;
-
         YAxis leftAxis = lineChart.getAxisLeft();
         leftAxis.setTextColor(ColorTemplate.getHoloBlue());
-        leftAxis.setAxisMaxValue(yAxisMaxValue);
-        leftAxis.setAxisMinValue(0f);
+
         leftAxis.setDrawGridLines(true);
-        leftAxis.setGranularityEnabled(true);
 
         YAxis rightAxis = lineChart.getAxisRight();
         rightAxis.setTextColor(ColorTemplate.getHoloBlue());
-        rightAxis.setAxisMaxValue(yAxisMaxValue);
-        rightAxis.setAxisMinValue(0f);
+
         rightAxis.setDrawGridLines(true);
-        rightAxis.setGranularityEnabled(true);
+
     }
 
 
@@ -434,4 +444,6 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
         this.stockSymbol = stockSymbol;
 
     }
+
+
 }

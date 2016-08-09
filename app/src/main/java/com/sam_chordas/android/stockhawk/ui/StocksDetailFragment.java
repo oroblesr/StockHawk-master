@@ -63,21 +63,7 @@ public class StocksDetailFragment extends Fragment {
     final int NOV = 10;
     final int DEC = 11;
 
-    private void addMonths(){
-        ArrayList<String> labels = new ArrayList<String>();
-        labels.add(getString(R.string.january));
-        labels.add(getString(R.string.february));
-        labels.add(getString(R.string.march));
-        labels.add(getString(R.string.april));
-        labels.add(getString(R.string.may));
-        labels.add(getString(R.string.june));
-        labels.add(getString(R.string.july));
-        labels.add(getString(R.string.august));
-        labels.add(getString(R.string.september));
-        labels.add(getString(R.string.october));
-        labels.add(getString(R.string.november));
-        labels.add(getString(R.string.december));
-    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -139,12 +125,6 @@ public class StocksDetailFragment extends Fragment {
             setPhoneLayout(rootView);
         }
 
-        // TODO correct description
-        lineChart.setDescription("This a test");
-        lineChart.setNoDataTextDescription(mContext.getString(R.string.no_data_text_description));
-
-        // enable touch gestures
-        lineChart.setTouchEnabled(true);
 
 
 
@@ -246,10 +226,10 @@ public class StocksDetailFragment extends Fragment {
 
 
         if (startDate != null){
-            startText.setText(getFormattedDate(startDate));
+            startText.setText(Utils.getFormattedDate(startDate));
         }
         if (endDate != null){
-            endText.setText(getFormattedDate(endDate));
+            endText.setText(Utils.getFormattedDate(endDate));
         }
 
         if (isConnected) {
@@ -270,7 +250,7 @@ public class StocksDetailFragment extends Fragment {
                             startDate[1] = month + 1;
                             startDate[2] = year;
 
-                            startText.setText(getFormattedDate(startDate));
+                            startText.setText(Utils.getFormattedDate(startDate));
                         }
                     };
                     newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
@@ -288,7 +268,7 @@ public class StocksDetailFragment extends Fragment {
                             endDate[1] = month + 1;
                             endDate[2] = year;
 
-                            endText.setText(getFormattedDate(endDate));
+                            endText.setText(Utils.getFormattedDate(endDate));
                         }
                     };
                     newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
@@ -412,19 +392,6 @@ public class StocksDetailFragment extends Fragment {
     };
 
 
-    private String getFormattedDate(int[] arrayDate){
-        final  String DATE_FORMAT = "yyyy-MM-dd";
-
-        String dd = String.format("%02d", arrayDate[0]);
-        String MM = String.format("%02d", arrayDate[1]);
-        String YYYY = String.format("%04d", arrayDate[2]);
-
-        String dateString = YYYY + "-" + MM + "-" + dd;
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT);
-        DateTime date = dateTimeFormatter.parseDateTime(dateString);
-        Locale locale = Locale.getDefault();
-        return date.toString("dd-MMM-yy", locale);
-    }
 
     public void networkToast() {
         Toast.makeText(mContext, getString(R.string.network_toast_detail), Toast.LENGTH_SHORT).show();
