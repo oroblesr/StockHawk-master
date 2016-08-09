@@ -246,10 +246,10 @@ public class StocksDetailFragment extends Fragment {
 
 
         if (startDate != null){
-            startText.setText(getFormatedDate(startDate));
+            startText.setText(getFormattedDate(startDate));
         }
         if (endDate != null){
-            endText.setText(getFormatedDate(endDate));
+            endText.setText(getFormattedDate(endDate));
         }
 
         if (isConnected) {
@@ -270,7 +270,7 @@ public class StocksDetailFragment extends Fragment {
                             startDate[1] = month + 1;
                             startDate[2] = year;
 
-                            startText.setText(getFormatedDate(startDate));
+                            startText.setText(getFormattedDate(startDate));
                         }
                     };
                     newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
@@ -288,7 +288,7 @@ public class StocksDetailFragment extends Fragment {
                             endDate[1] = month + 1;
                             endDate[2] = year;
 
-                            endText.setText(getFormatedDate(endDate));
+                            endText.setText(getFormattedDate(endDate));
                         }
                     };
                     newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
@@ -352,17 +352,19 @@ public class StocksDetailFragment extends Fragment {
                 // Simplifying by querying the current month, if the current day is > 28
                 if (currentDay < 28){
                     startDay = currentDay;
-                    startMonth = currentMonth - 1;
+                    // Previous month
+                    startMonth = currentMonth;
                 }
                 else {
                     startDay = 1;
-                    startMonth = currentMonth;
+                    // Current month
+                    startMonth = currentMonth + 1;
                 }
 
             }
 
             endDay = currentDay;
-            endMonth = currentMonth;
+            endMonth = currentMonth + 1;
             endYear = currentYear;
 
             startDate = new int[]{startDay, startMonth, startYear};
@@ -410,7 +412,7 @@ public class StocksDetailFragment extends Fragment {
     };
 
 
-    private String getFormatedDate (int[] arrayDate){
+    private String getFormattedDate(int[] arrayDate){
         final  String DATE_FORMAT = "yyyy-MM-dd";
 
         String dd = String.format("%02d", arrayDate[0]);
