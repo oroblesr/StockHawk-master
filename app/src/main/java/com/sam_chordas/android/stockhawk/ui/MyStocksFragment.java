@@ -178,8 +178,6 @@ public class MyStocksFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
 
-
-
     @Override
     public void onResume() {
         super.onResume();
@@ -200,7 +198,7 @@ public class MyStocksFragment extends Fragment implements LoaderManager.LoaderCa
                         QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP,
                         QuoteColumns.NAME},
                 QuoteColumns.ISCURRENT + " = ?",
-                new String[]{"1"},
+                new String[]{String.valueOf(Utils.INT_TRUE)},
                 null);
     }
 

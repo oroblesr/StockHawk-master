@@ -51,6 +51,8 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
     private int startDay, startMonth, startYear;
     private int endDay, endMonth, endYear;
 
+    private String LOG_TAG = HistoricalAsyncTask.class.getSimpleName();
+
     private LineChart lineChart;
     private String stockName;
     private String stockSymbol;
@@ -421,7 +423,7 @@ public class HistoricalAsyncTask extends AsyncTask<Void, Void, Void> {
                     mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                             Utils.quoteHistoricalJsonToContentVals(getResponse,mContext,stockSymbol));
                 } catch (RemoteException | OperationApplicationException e) {
-                    Log.e("StockHawk", "Error applying batch insert", e);
+                    Log.e(LOG_TAG, "Error applying batch insert", e);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
