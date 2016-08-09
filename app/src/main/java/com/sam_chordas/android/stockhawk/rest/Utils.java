@@ -139,6 +139,7 @@ public class Utils {
         final String YQL_DATE = "Date";
         final String MILLIS_COLUMN = "millis_epoch";
         final String SYMBOL_COLUMN = "symbol";
+        final String CURRENT_COLUMN = "is_current";
         final int MILLIS_EPOCH = 0;
         final int SYMBOL = 1;
 
@@ -148,13 +149,14 @@ public class Utils {
             DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(YQL_DATE_FORMAT);
             Long millisEpoch = dateTimeFormatter.parseMillis(date);
 
-            String stockSelection = MILLIS_COLUMN + " = ?" + " AND " + SYMBOL_COLUMN + " = ? ";
-            String[] selectArgs = {Long.toString(millisEpoch), symbol};
+            String stockSelection = MILLIS_COLUMN + " = ?" + " AND " + SYMBOL_COLUMN + " = ? " +
+            " AND " + SYMBOL_COLUMN + " = ? ";
+            String[] selectArgs = {Long.toString(millisEpoch), symbol, String.valueOf(INT_TRUE)};
 
 
             Cursor dbCursor = context.getContentResolver().query(
                     QuoteProvider.Historical.HISTORICAL_URI,
-                    new String[] {MILLIS_COLUMN,SYMBOL_COLUMN}, // The columns to return for each row
+                    new String[] {MILLIS_COLUMN,SYMBOL_COLUMN,SYMBOL_COLUMN}, // The columns to return for each row
                     stockSelection,     // Selection criteria
                     selectArgs,               // Selection criteria
                     null);              // The sort order for the returned rows
