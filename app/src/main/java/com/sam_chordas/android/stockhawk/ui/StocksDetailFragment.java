@@ -284,15 +284,20 @@ public class StocksDetailFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
 
-
-                    if (Utils.getEpochTime(endDate) < Utils.getEpochTime(startDate)) {
-                        Toast toast = Toast.makeText(getContext(), getString(R.string.wrong_date), Toast.LENGTH_SHORT);
+                    if (startDate == null || endDate == null){
+                        Toast toast = Toast.makeText(getContext(), getString(R.string.no_date), Toast.LENGTH_SHORT);
                         toast.show();
                     }
                     else {
-                        HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
-                        historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
-                        historicalDB.execute();
+                        if (Utils.getEpochTime(endDate) < Utils.getEpochTime(startDate)) {
+                            Toast toast = Toast.makeText(getContext(), getString(R.string.wrong_date), Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                        else {
+                            HistoricalAsyncTask historicalDB = new HistoricalAsyncTask(getContext(), lineChart);
+                            historicalDB.getHistoricalStocksInRange(startDate, endDate, stockSymbol, stockName);
+                            historicalDB.execute();
+                        }
                     }
 
                 }

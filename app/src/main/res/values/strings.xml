@@ -18,7 +18,7 @@
     <string name="stock_detail_name">Stock detail</string>
     <string name="no_data_text_description">Please select an option</string>
     <string name="wrong_date">Please make sure starting date is previous to ending date</string>
-
+    <string name="no_date">Please select a starting and an ending date</string>
 
     <string name="january">Jan</string>
     <string name="february">Feb</string>
