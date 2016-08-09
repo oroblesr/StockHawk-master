@@ -6,7 +6,9 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/recycler__view_padding"
+        android:clipToPadding="false"/>
 
     <com.melnykov.fab.FloatingActionButton
         android:id="@+id/fab"

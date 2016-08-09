@@ -16,4 +16,5 @@
 
 
     <dimen name="text_padding">8dp</dimen>
+    <dimen name="recycler__view_padding">48dp</dimen>
 </resources>
